@@ -5,9 +5,13 @@ import (
 	"github.com/spf13/viper"
 	"io"
 	"net/http"
+	"os"
 
+	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/jaxxstorm/http-blob-reader/pkg/cloudblob"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -42,8 +46,20 @@ func Command() *cobra.Command {
 				return err
 			}
 
+			zerolog.SetGlobalLevel(zerolog.InfoLevel)
+			if gin.IsDebugging() {
+				zerolog.SetGlobalLevel(zerolog.DebugLevel)
+			}
+
+			log.Logger = log.Output(
+				zerolog.ConsoleWriter{
+					Out:     os.Stderr,
+					NoColor: false,
+				},
+			)
+
 			r := gin.New()
-			r.Use(gin.Logger())
+			r.Use(logger.SetLogger())
 			r.Use(gin.Recovery())
 
 			r.GET("/", gin.WrapF(func(w http.ResponseWriter, req *http.Request) {

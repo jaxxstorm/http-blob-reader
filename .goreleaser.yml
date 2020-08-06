@@ -1,0 +1,32 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+before:
+builds:
+- env:
+  - CGO_ENABLED=0
+  main: ./cmd/http-blob-reader/main.go
+  goos:
+    - darwin
+    - windows
+    - linux
+  goarch:
+      - amd64
+  ldflags: -X github.com/jaxxstorm/http-blob-reader/pkg/version.Version={{.Version}}
+  binary: http-blob-reader
+archives:
+- name_template: "{{ .Binary }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}"
+  format_overrides:
+    - goos: windows
+      format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  skip: true
+dockers:
+  - binaries:
+    - http-blob-reader
+    image_templates:
+      - "docker.pkg.github.com/jaxxstorm/http-blob-reader/http-blob-reader:{{ .Tag }}"
+      - "docker.pkg.github.com/jaxxstorm/http-blob-reader/http-blob-reader:latest"
